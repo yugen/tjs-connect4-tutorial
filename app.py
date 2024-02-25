@@ -1,3 +1,5 @@
+import os
+import signal
 import asyncio
 import websockets
 import json
@@ -105,8 +107,6 @@ async def watch(websocket, watch_key):
     await replay(websocket, game)
     await play(websocket, game, PLAYER1, connected)
         
-
-
 async def handler(websocket):
     message = await websocket.recv()
     event = json.loads(message)
@@ -121,8 +121,13 @@ async def handler(websocket):
 
 
 async def main():
-    async with websockets.serve(handler, "", 8001):
-        await asyncio.Future()
+    loop = asyncio.get_running_loop()
+    stop = loop.create_future()
+    loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
+    
+    port = int(os.environ.get("PORT", "8001"))
+    async with websockets.serve(handler, "", port):
+        await stop
 
 if __name__ == "__main__":
     asyncio.run(main())
