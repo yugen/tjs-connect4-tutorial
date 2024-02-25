@@ -1,5 +1,15 @@
 import {createBoard, playMove} from './connect4.js';
 
+function getWebSocketServer() {
+    if (window.location.host === "tjs-connect4-tutorial.github.io") {
+        return "wss://tjs-connect4-tutorial-0232109821fc.herokuapp.com";
+    } else if (window.location.host === "localhost:8000") {
+        return "ws://localhost:8001";
+    } else {
+        throw new Error("Unknown host");
+    }
+}
+
 function isWatcher() {
     const params = new URLSearchParams(window.location.search);
     return params.has("watch");
@@ -102,7 +112,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const board = document.querySelector(".board");
     createBoard(board);
 
-    const websocket = new WebSocket("ws://localhost:8001");
+    const websocket = new WebSocket(getWebSocketServer());
     initGame(websocket);
     receiveMoves(board, websocket);
     
